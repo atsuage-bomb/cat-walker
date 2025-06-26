@@ -70,6 +70,13 @@ const keys = {};
 // ★★★修正点★★★: documentからwindowに変更し、より確実にイベントを捕捉
 window.addEventListener('keydown', (e) => {
 
+    // まだゲームが始まっていなければ、ゲームを開始する
+    if (!gameStarted) {
+        gameStarted = true;
+        startScreen.style.display = 'none'; // スタート画面を非表示に
+    }
+    // ★★★ここまで追加★★★
+
     // BGMがまだ再生されていなければ、再生を開始する
     if (!isBgmPlaying) {
         bgm.play();
