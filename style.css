@@ -1,18 +1,33 @@
-body {
+/* ★★★修正点★★★: ページ全体のスクロールを禁止する設定 */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* これが最重要！スクロールバーを強制的に消す */
+    font-family: 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
     background-color: #f0f0f0;
+}
+
+/* ★★★修正点★★★: Flexboxでページ全体のレイアウトを管理 */
+body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-family: 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+}
+
+h1 {
+    margin: 10px 0;
+    flex-shrink: 0; /* h1が縮まないように */
 }
 
 #game-container {
     position: relative;
     border: 2px solid #333;
+    flex-shrink: 0; /* ゲーム画面が縮まないように */
 }
 
 #gameCanvas {
-    background-color: #87CEEB; /* 空の色 */
+    background-color: #87CEEB;
     display: block;
 }
 
@@ -28,26 +43,9 @@ body {
     text-shadow: 2px 2px 4px #000;
 }
 
-#health-bar-container {
-    display: flex;
-    align-items: center;
-}
-
-#health-bar {
-    width: 200px;
-    height: 20px;
-    background-color: #555;
-    border: 2px solid white;
-    border-radius: 5px;
-    margin-left: 10px;
-}
-
-#health-bar-inner {
-    width: 100%;
-    height: 100%;
-    background-color: #7CFC00; /* 体力の色 */
-    border-radius: 2px;
-}
+#health-bar-container { display: flex; align-items: center; }
+#health-bar { width: 200px; height: 20px; background-color: #555; border: 2px solid white; border-radius: 5px; margin-left: 10px; }
+#health-bar-inner { width: 100%; height: 100%; background-color: #7CFC00; border-radius: 2px; }
 
 #game-over {
     position: absolute;
@@ -62,11 +60,17 @@ body {
     font-size: 24px;
 }
 
-/* (既存のスタイルはそのまま) */
+/* ★★★修正点★★★: 説明文エリア全体を囲むラッパー */
+#info-wrapper {
+    flex: 1; /* 残りのスペースをすべて使う */
+    overflow-y: auto; /* このエリア内だけスクロールを許可 */
+    width: 100%;
+    max-width: 800px; /* ゲーム画面の幅に合わせる */
+    padding: 10px;
+    box-sizing: border-box; /* paddingを含めてサイズ計算 */
+}
 
-/* ★★★この部分を追加★★★ */
 .controls-info {
-    margin-top: 15px; /* ゲーム画面との間隔 */
     padding: 10px;
     background-color: #e9e9e9;
     border-radius: 8px;
@@ -74,75 +78,27 @@ body {
     color: #333;
     font-size: 16px;
     text-align: center;
+    margin-bottom: 15px;
 }
 
-.controls-info strong {
-    font-weight: bold;
-    color: #000;
-}
+.controls-info strong { font-weight: bold; color: #000; }
 
-/* (既存のスタイルはそのまま) */
-
-/* ★★★ここから下を追加★★★ */
-
-/* 説明エリア全体のコンテナ */
 .game-guide {
-    margin-top: 20px;
     padding: 15px 25px;
-    max-width: 750px; /* ゲーム画面の幅に近づける */
     background-color: #ffffff;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    text-align: left; /* 左揃えに */
+    text-align: left;
 }
 
-/* 各セクション（ルール、キャラクター） */
-.guide-section {
-    margin-bottom: 20px;
-}
-.guide-section:last-child {
-    margin-bottom: 5px;
-}
-
-/* セクションのタイトル (h3) */
-.guide-section h3 {
-    font-size: 18px;
-    margin-bottom: 12px;
-    padding-bottom: 5px;
-    border-bottom: 2px solid #7CFC00; /* 体力ゲージの色に合わせる */
-}
-
-/* ルールリストのスタイル */
-.guide-section ul {
-    padding-left: 25px;
-    list-style-type: "⭐ "; /* リストの点を星にする */
-}
-
-.guide-section li {
-    padding-left: 5px;
-    margin-bottom: 8px;
-    line-height: 1.5;
-}
-
-/* キャラクター説明のスタイル */
-.character-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-/* アイコンの共通スタイル */
-.character-item .icon {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    margin-right: 12px;
-    border-radius: 4px;
-    flex-shrink: 0; /* アイコンが縮まないように */
-}
-
-/* 各アイコンの色をゲーム内の色と合わせる */
+.guide-section { margin-bottom: 20px; }
+.guide-section:last-child { margin-bottom: 5px; }
+.guide-section h3 { font-size: 18px; margin-bottom: 12px; padding-bottom: 5px; border-bottom: 2px solid #7CFC00; }
+.guide-section ul { padding-left: 25px; list-style-type: "⭐ "; }
+.guide-section li { padding-left: 5px; margin-bottom: 8px; line-height: 1.5; }
+.character-item { display: flex; align-items: center; margin-bottom: 12px; }
+.character-item .icon { display: inline-block; width: 20px; height: 20px; margin-right: 12px; border-radius: 4px; flex-shrink: 0; }
 .icon.cat { background-color: #FFD700; }
 .icon.obstacle-fixed { background-color: #A52A2A; }
 .icon.obstacle-moving { background-color: #228B22; }
