@@ -4,6 +4,8 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+const startScreen = document.getElementById('start-screen');
+
 // ねこの画像を読み込む
 const playerImage = new Image();
 playerImage.src = 'cat.png'; // ファイル名が違う場合はここを修正
@@ -22,6 +24,7 @@ const gameOverDisplay = document.getElementById('game-over');
 let score = 0;
 let gameOver = false;
 let gameRunning = true;
+let gameStarted = false; // ゲームが開始したかを管理する変数
 
 // 物理定数
 const GRAVITY = 0.5;
@@ -158,7 +161,7 @@ function generateItems() {
 // ゲームの更新処理
 // ===================================
 function update() {
-    if (!gameRunning) return;
+    if (!gameStarted || !gameRunning) return; // ゲームが始まっていないか、終わっていたら処理をしない
 
     handleInput();
 
