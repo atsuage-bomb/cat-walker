@@ -42,9 +42,9 @@ const player = {
 let obstacles = [];
 let items = [];
 
-// ★★★修正点★★★：ゲームを開始する専用の関数
-function startGame() {
-    if (gameStarted) return; // すでに始まっていたら何もしない
+// ★★★修正点★★★：ゲームを開始する専用の関数を再定義
+function startGameOnce() {
+    if (gameStarted) return; // 一度しか実行されないようにする
     gameStarted = true;
     startScreen.style.display = 'none';
 
@@ -61,10 +61,11 @@ function startGame() {
 // ===================================
 const keys = {};
 window.addEventListener('keydown', (e) => {
-    startGame();
+    startGameOnce(); // 最初のキー操作でゲームを開始
     if (e.code === 'Space') { e.preventDefault(); }
     keys[e.code] = true;
 });
+
 window.addEventListener('keyup', (e) => {
     if (e.code === 'Space') { e.preventDefault(); }
     keys[e.code] = false;
@@ -144,30 +145,32 @@ gameLoop();
 const btnLeft = document.getElementById('btn-left');
 const btnRight = document.getElementById('btn-right');
 const btnJump = document.getElementById('btn-jump');
+
 function handleTouchStart(e, keyCode) {
     e.preventDefault();
-    if (!gameStarted) return; // ゲームが始まってなければ操作しない
+    startGameOnce(); // ★★★修正点★★★: タッチボタンの最初の操作でもゲームを開始
     keys[keyCode] = true;
 }
 function handleTouchEnd(e, keyCode) {
     e.preventDefault();
     keys[keyCode] = false;
 }
+
 btnLeft.addEventListener('mousedown', (e) => handleTouchStart(e, 'ArrowLeft'));
 btnLeft.addEventListener('mouseup', (e) => handleTouchEnd(e, 'ArrowLeft'));
 btnLeft.addEventListener('touchstart', (e) => handleTouchStart(e, 'ArrowLeft'));
 btnLeft.addEventListener('touchend', (e) => handleTouchEnd(e, 'ArrowLeft'));
+
 btnRight.addEventListener('mousedown', (e) => handleTouchStart(e, 'ArrowRight'));
 btnRight.addEventListener('mouseup', (e) => handleTouchEnd(e, 'ArrowRight'));
 btnRight.addEventListener('touchstart', (e) => handleTouchStart(e, 'ArrowRight'));
 btnRight.addEventListener('touchend', (e) => handleTouchEnd(e, 'ArrowRight'));
+
 btnJump.addEventListener('mousedown', (e) => handleTouchStart(e, 'Space'));
 btnJump.addEventListener('mouseup', (e) => handleTouchEnd(e, 'Space'));
 btnJump.addEventListener('touchstart', (e) => handleTouchStart(e, 'Space'));
 btnJump.addEventListener('touchend', (e) => handleTouchEnd(e, 'Space'));
 
-// ★★★修正点★★★: スタート画面自体をタップしてもゲームが始まるようにする
-startScreen.addEventListener('touchstart', startGame, { once: true });
-startScreen.addEventListener('mousedown', startGame, { once: true });
-
+// ★★★修正点★★★: スタート画面自体をタップする古いロジックは削除
+// window.addEventListener('contextmenu', ... ) は、あってもなくても良いですが念のため残します
 window.addEventListener('contextmenu', function (e) { e.preventDefault(); });
