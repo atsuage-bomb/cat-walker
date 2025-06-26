@@ -224,8 +224,10 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#2E8B57';
     ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+    
+    // ★★★修正点★★★：四角形から画像描画に変更
+    // プレイヤーを描画
+    ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
 
     const allObjects = [...obstacles, ...items];
     allObjects.forEach(obj => {
