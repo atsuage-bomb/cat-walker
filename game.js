@@ -17,10 +17,11 @@ let gameRunning = true;
 const GRAVITY = 0.5;
 const GROUND_Y = canvas.height - 50; // 地面のY座標
 
-// ★変更点：エンドレス化のための設定
-let gameSpeed = 3; // ゲームの初期スクロール速度
-const gameSpeedIncrease = 0.001; // スピードの増加量
-let nextSpawnX = canvas.width; // 次にオブジェクトを生成するX座標の閾値
+// エンドレス化のための設定
+let gameSpeed = 3; 
+const gameSpeedIncrease = 0.001;
+// ★★★修正点★★★：次のオブジェクト生成位置を示すマーカー。最初は画面のすぐ右。
+let nextSpawnX = canvas.width + 50; 
 
 // ===================================
 // プレイヤー（猫）の設定
@@ -37,13 +38,12 @@ const player = {
     isJumping: false,
     health: 100,
     maxHealth: 100,
-    color: '#FFD700' // 猫の色（金色）
+    color: '#FFD700'
 };
 
 // ===================================
 // ゲームオブジェクトの管理配列
 // ===================================
-// ★変更点：開始時のオブジェクトは空か少量にして、動的に生成する
 let obstacles = [];
 let items = [];
 
@@ -61,16 +61,12 @@ document.addEventListener('keyup', (e) => {
 function handleInput() {
     if (gameOver) return;
 
-    // ★変更点：プレイヤーが画面内を自由に動けるようにする
-    // 左移動
     if (keys['ArrowLeft'] && player.x > 0) {
         player.x -= player.speed;
     }
-    // 右移動
     if (keys['ArrowRight'] && player.x < canvas.width - player.width) {
         player.x += player.speed;
     }
-    // ジャンプ
     if (keys['Space'] && !player.isJumping) {
         player.velocityY = -player.jumpPower;
         player.isJumping = true;
@@ -87,36 +83,34 @@ function checkCollision(rect1, rect2) {
            rect1.y + rect1.height > rect2.y;
 }
 
-// ★追加：オブジェクトをランダムに生成する関数
+// ★★★修正点★★★：オブジェクトを生成し、次の生成マーカーを更新する関数
 function generateObjects() {
-    // 次の生成ポイントをランダムに決定
-    const spawnInterval = Math.random() * 400 + 200; // 200pxから600pxの間隔
-    nextSpawnX += spawnInterval;
+    // 現在のマーカー位置にオブジェクトを生成
+    const spawnX = nextSpawnX;
 
-    // 確率で何を生成するか決める
     const rand = Math.random();
-    if (rand < 0.6) { // 60%の確率で障害物
-        const obsHeight = Math.random() * 40 + 20; // 高さをランダムに
+    if (rand < 0.6) { // 障害物
+        const obsHeight = Math.random() * 40 + 20;
         obstacles.push({
-            x: nextSpawnX,
+            x: spawnX,
             y: GROUND_Y - obsHeight,
             width: 30,
             height: obsHeight,
             color: '#A52A2A'
         });
-    } else if (rand < 0.8) { // 20%の確率で動く障害物
+    } else if (rand < 0.8) { // 動く障害物
          obstacles.push({
-            x: nextSpawnX,
+            x: spawnX,
             y: GROUND_Y - 20,
             width: 40,
             height: 20,
-            speed: -gameSpeed * (Math.random() * 0.5 + 0.8), // 速度も少しランダムに
+            speed: -gameSpeed * (Math.random() * 0.5 + 0.8),
             color: '#228B22'
         });
-    } else { // 20%の確率で回復アイテム
+    } else { // 回復アイテム
         items.push({
-            x: nextSpawnX,
-            y: GROUND_Y - 80, // アイテムはジャンプで取る位置に
+            x: spawnX,
+            y: GROUND_Y - 80,
             width: 20,
             height: 20,
             color: '#FF69B4',
@@ -124,6 +118,10 @@ function generateObjects() {
             value: 20
         });
     }
+
+    // 次の生成マーカーを、今生成した場所からさらに右側（未来）へランダムな間隔で設定する
+    const spawnInterval = Math.random() * 300 + 250; // 間隔を調整
+    nextSpawnX = spawnX + spawnInterval;
 }
 
 // ===================================
@@ -137,65 +135,61 @@ function update() {
     // --- プレイヤーの更新 ---
     player.velocityY += GRAVITY;
     player.y += player.velocityY;
-
-    // 地面との衝突
     if (player.y + player.height > GROUND_Y) {
         player.y = GROUND_Y - player.height;
         player.velocityY = 0;
         player.isJumping = false;
     }
 
-    // ★変更点：自動スクロールとオブジェクト管理
-    // 全てのオブジェクトを左にスクロールさせる
+    // --- 自動スクロール ---
     [obstacles, items].forEach(arr => {
         arr.forEach(obj => {
             obj.x -= gameSpeed;
-            // 動く障害物は自身の速度も加算
             if (obj.speed) {
                 obj.x += obj.speed;
             }
         });
     });
 
+    // ★★★修正点★★★：生成マーカーも一緒にスクロールさせる
+    nextSpawnX -= gameSpeed;
+
+    // ★★★修正点★★★：マーカーが画面内に入ってきたら、次のオブジェクト生成を命令する
+    if (nextSpawnX <= canvas.width) {
+        generateObjects();
+    }
+
     // スコアを加算し、難易度を上げる
     score += 1;
     gameSpeed += gameSpeedIncrease;
 
-    // ★変更点：画面外に出たオブジェクトを配列から削除してメモリを節約
+    // --- 画面外オブジェクトの削除 ---
     obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
     items = items.filter(item => item.x + item.width > 0);
 
-    // ★変更点：一定距離進んだら新しいオブジェクトを生成
-    if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width) {
-        generateObjects();
-    }
-    
     // --- 当たり判定 ---
-    // 障害物
     obstacles.forEach(obs => {
         if (checkCollision(player, obs)) {
             player.health -= 0.5;
         }
     });
     
-    // アイテム
     items.forEach((item, index) => {
         if (checkCollision(player, item)) {
             if (item.type === 'health') {
                 player.health = Math.min(player.maxHealth, player.health + item.value);
                 score += 50;
-                items.splice(index, 1); // アイテムを消す
+                items.splice(index, 1);
             }
         }
     });
 
-    // --- 体力とスコアの更新 ---
-    player.health -= 0.05; // 時間経過で体力が減る
-    
+    // --- UIの更新 ---
+    player.health -= 0.05; 
     healthBarInner.style.width = `${Math.max(0, player.health)}%`;
     scoreDisplay.textContent = score;
 
-    // ゲームオーバー判定
+    // --- ゲームオーバー判定 ---
     if (player.health <= 0) {
         gameOver = true;
         gameRunning = false;
@@ -204,7 +198,7 @@ function update() {
 }
 
 // ===================================
-// 描画処理
+// 描画処理 (変更なし)
 // ===================================
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
