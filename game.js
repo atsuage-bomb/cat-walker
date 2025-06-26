@@ -83,44 +83,51 @@ function checkCollision(rect1, rect2) {
            rect1.y + rect1.height > rect2.y;
 }
 
-// ★★★修正点★★★：オブジェクトを生成し、次の生成マーカーを更新する関数
+// ★★★修正点★★★：オブジェクトの生成ロジックを全面的に改善
 function generateObjects() {
-    // 現在のマーカー位置にオブジェクトを生成
+    // 現在のマーカー位置を基準にオブジェクトを生成
     const spawnX = nextSpawnX;
 
-    const rand = Math.random();
-    if (rand < 0.6) { // 障害物
-        const obsHeight = Math.random() * 40 + 20;
+    // --- ステップ1: 障害物を生成する ---
+    // 50%の確率で動く障害物、50%で通常の固定障害物を生成
+    if (Math.random() < 0.5) {
+        // 動く障害物
         obstacles.push({
-            x: spawnX,
-            y: GROUND_Y - obsHeight,
-            width: 30,
-            height: obsHeight,
-            color: '#A52A2A'
-        });
-    } else if (rand < 0.8) { // 動く障害物
-         obstacles.push({
             x: spawnX,
             y: GROUND_Y - 20,
             width: 40,
             height: 20,
             speed: -gameSpeed * (Math.random() * 0.5 + 0.8),
-            color: '#228B22'
+            color: '#228B22' // ヘビの色
         });
-    } else { // 回復アイテム
-        items.push({
+    } else {
+        // 通常の固定障害物
+        const obsHeight = Math.random() * 50 + 20; // 高さを少しランダムに
+        obstacles.push({
             x: spawnX,
-            y: GROUND_Y - 80,
+            y: GROUND_Y - obsHeight,
+            width: 30,
+            height: obsHeight,
+            color: '#A52A2A' // レンガの色
+        });
+    }
+
+    // --- ステップ2: さらに30%の確率で、回復アイテムも追加で生成する ---
+    if (Math.random() < 0.3) {
+        // アイテムは障害物と同じ場所か、少しずらした場所の空中に出現
+        items.push({
+            x: spawnX + 20, // 少し右にずらす
+            y: GROUND_Y - 100, // ジャンプで取れる高さ
             width: 20,
             height: 20,
-            color: '#FF69B4',
+            color: '#FF69B4', // おやつの色
             type: 'health',
             value: 20
         });
     }
 
-    // 次の生成マーカーを、今生成した場所からさらに右側（未来）へランダムな間隔で設定する
-    const spawnInterval = Math.random() * 300 + 250; // 間隔を調整
+    // --- ステップ3: 次の生成マーカーを、未来（右側）へ移動させる ---
+    const spawnInterval = Math.random() * 300 + 250;
     nextSpawnX = spawnX + spawnInterval;
 }
 
