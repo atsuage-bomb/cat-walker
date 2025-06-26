@@ -80,3 +80,70 @@ body {
     font-weight: bold;
     color: #000;
 }
+
+/* (既存のスタイルはそのまま) */
+
+/* ★★★ここから下を追加★★★ */
+
+/* 説明エリア全体のコンテナ */
+.game-guide {
+    margin-top: 20px;
+    padding: 15px 25px;
+    max-width: 750px; /* ゲーム画面の幅に近づける */
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    text-align: left; /* 左揃えに */
+}
+
+/* 各セクション（ルール、キャラクター） */
+.guide-section {
+    margin-bottom: 20px;
+}
+.guide-section:last-child {
+    margin-bottom: 5px;
+}
+
+/* セクションのタイトル (h3) */
+.guide-section h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #7CFC00; /* 体力ゲージの色に合わせる */
+}
+
+/* ルールリストのスタイル */
+.guide-section ul {
+    padding-left: 25px;
+    list-style-type: "⭐ "; /* リストの点を星にする */
+}
+
+.guide-section li {
+    padding-left: 5px;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+/* キャラクター説明のスタイル */
+.character-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+/* アイコンの共通スタイル */
+.character-item .icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    border-radius: 4px;
+    flex-shrink: 0; /* アイコンが縮まないように */
+}
+
+/* 各アイコンの色をゲーム内の色と合わせる */
+.icon.cat { background-color: #FFD700; }
+.icon.obstacle-fixed { background-color: #A52A2A; }
+.icon.obstacle-moving { background-color: #228B22; }
+.icon.item-health { background-color: #FF69B4; }
