@@ -23,7 +23,7 @@
 
             <canvas id="gameCanvas" width="800" height="400"></canvas>
 
-            <div id="ui-container" style="display: none;">
+            <div id="ui-container">
                 <div id="health-bar-container">
                     <span>たいりょく:</span>
                     <div id="health-bar">
@@ -35,13 +35,13 @@
                 </div>
             </div>
 
-            <div id="game-over" style="display: none;">
+            <div id="game-over">
                 <h2>GAME OVER</h2>
-                <p>F5キーでリトライ</p>
+                <p>ページを再読み込みしてリトライ</p>
             </div>
         </div>
 
-        <div id="touch-controls" style="display: none;">
+        <div id="touch-controls">
             <div class="touch-area left">
                 <button id="btn-left">←</button>
             </div>
@@ -53,7 +53,6 @@
             </div>
         </div>
     </div>
-
 
     <div id="info-wrapper">
         <div class="controls-info">
@@ -81,6 +80,6 @@
         </div>
     </div>
 
-    <script src="game.js"></script>
+    <script src="game.js" defer></script>
 </body>
 </html>
