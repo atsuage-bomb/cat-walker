@@ -108,9 +108,9 @@ const player = {
         if (checkCollision(player, obs)) {
             // ★★★修正点★★★: 敵の種類（色）によってダメージを変える
             if (obs.color === '#228B22') { // もし緑色の敵なら
-                player.health -= 2.0; // ダメージ大
+                player.health -= 2.5; // ダメージ大
             } else { // それ以外（茶色の敵）なら
-                player.health -= 0.5; // ダメージ小
+                player.health -= 0.8; // ダメージ小
             }
         }
     });
