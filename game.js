@@ -72,8 +72,6 @@ window.addEventListener('keyup', (e) => {
     keys[e.code] = false;
 });
 
-document.addEventListener('keyup', (e) => { keys[e.code] = false; });
-
 function handleInput() {
     if (gameOver) return;
     if (keys['ArrowLeft'] && player.x > 0) { player.x -= player.speed; }
