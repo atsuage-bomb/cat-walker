@@ -20,8 +20,10 @@ const GROUND_Y = canvas.height - 50; // 地面のY座標
 // エンドレス化のための設定
 let gameSpeed = 3; 
 const gameSpeedIncrease = 0.001;
-// ★★★修正点★★★：次のオブジェクト生成位置を示すマーカー。最初は画面のすぐ右。
-let nextSpawnX = canvas.width + 50; 
+
+// ★★★修正点★★★：障害物とアイテムの生成マーカーを完全に分離
+let nextObstacleSpawnX = canvas.width + 50; // 障害物用の生成マーカー
+let nextItemSpawnX = canvas.width + 500;   // アイテム用の生成マーカー（少し遅れてスタート）
 
 // ===================================
 // プレイヤー（猫）の設定
@@ -51,22 +53,13 @@ let items = [];
 // 入力処理 (変更なし)
 // ===================================
 const keys = {};
-document.addEventListener('keydown', (e) => {
-    keys[e.code] = true;
-});
-document.addEventListener('keyup', (e) => {
-    keys[e.code] = false;
-});
+document.addEventListener('keydown', (e) => { keys[e.code] = true; });
+document.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 function handleInput() {
     if (gameOver) return;
-
-    if (keys['ArrowLeft'] && player.x > 0) {
-        player.x -= player.speed;
-    }
-    if (keys['ArrowRight'] && player.x < canvas.width - player.width) {
-        player.x += player.speed;
-    }
+    if (keys['ArrowLeft'] && player.x > 0) { player.x -= player.speed; }
+    if (keys['ArrowRight'] && player.x < canvas.width - player.width) { player.x += player.speed; }
     if (keys['Space'] && !player.isJumping) {
         player.velocityY = -player.jumpPower;
         player.isJumping = true;
@@ -83,53 +76,42 @@ function checkCollision(rect1, rect2) {
            rect1.y + rect1.height > rect2.y;
 }
 
-// ★★★修正点★★★：オブジェクトの生成ロジックを全面的に改善
-function generateObjects() {
-    // 現在のマーカー位置を基準にオブジェクトを生成
-    const spawnX = nextSpawnX;
-
-    // --- ステップ1: 障害物を生成する ---
+// ★★★修正点★★★：「障害物」を生成する専用の関数
+function generateObstacles() {
+    const spawnX = nextObstacleSpawnX;
+    
     // 50%の確率で動く障害物、50%で通常の固定障害物を生成
     if (Math.random() < 0.5) {
-        // 動く障害物
         obstacles.push({
-            x: spawnX,
-            y: GROUND_Y - 20,
-            width: 40,
-            height: 20,
-            speed: -gameSpeed * (Math.random() * 0.5 + 0.8),
-            color: '#228B22' // ヘビの色
+            x: spawnX, y: GROUND_Y - 20, width: 40, height: 20,
+            speed: -gameSpeed * (Math.random() * 0.5 + 0.8), color: '#228B22'
         });
     } else {
-        // 通常の固定障害物
-        const obsHeight = Math.random() * 50 + 20; // 高さを少しランダムに
+        const obsHeight = Math.random() * 50 + 20;
         obstacles.push({
-            x: spawnX,
-            y: GROUND_Y - obsHeight,
-            width: 30,
-            height: obsHeight,
-            color: '#A52A2A' // レンガの色
+            x: spawnX, y: GROUND_Y - obsHeight, width: 30, height: obsHeight, color: '#A52A2A'
         });
     }
 
-    // --- ステップ2: さらに30%の確率で、回復アイテムも追加で生成する ---
-    if (Math.random() < 0.3) {
-        // アイテムは障害物と同じ場所か、少しずらした場所の空中に出現
-        items.push({
-            x: spawnX + 20, // 少し右にずらす
-            y: GROUND_Y - 100, // ジャンプで取れる高さ
-            width: 20,
-            height: 20,
-            color: '#FF69B4', // おやつの色
-            type: 'health',
-            value: 20
-        });
-    }
-
-    // --- ステップ3: 次の生成マーカーを、未来（右側）へ移動させる ---
-    const spawnInterval = Math.random() * 300 + 250;
-    nextSpawnX = spawnX + spawnInterval;
+    // 次の"障害物"の生成マーカーを更新（間隔を短くして密度を上げる）
+    const spawnInterval = Math.random() * 200 + 150; // 150pxから350pxの間隔
+    nextObstacleSpawnX = spawnX + spawnInterval;
 }
+
+// ★★★修正点★★★：「アイテム」を生成する専用の関数
+function generateItems() {
+    const spawnX = nextItemSpawnX;
+    
+    items.push({
+        x: spawnX, y: GROUND_Y - 100, width: 20, height: 20,
+        color: '#FF69B4', type: 'health', value: 20
+    });
+
+    // 次の"アイテム"の生成マーカーを更新（障害物よりは長めの間隔で出現）
+    const spawnInterval = Math.random() * 500 + 400; // 400pxから900pxの間隔
+    nextItemSpawnX = spawnX + spawnInterval;
+}
+
 
 // ===================================
 // ゲームの更新処理
@@ -152,23 +134,26 @@ function update() {
     [obstacles, items].forEach(arr => {
         arr.forEach(obj => {
             obj.x -= gameSpeed;
-            if (obj.speed) {
-                obj.x += obj.speed;
-            }
+            if (obj.speed) { obj.x += obj.speed; }
         });
     });
 
-    // ★★★修正点★★★：生成マーカーも一緒にスクロールさせる
-    nextSpawnX -= gameSpeed;
-
-    // ★★★修正点★★★：マーカーが画面内に入ってきたら、次のオブジェクト生成を命令する
-    if (nextSpawnX <= canvas.width) {
-        generateObjects();
-    }
-
-    // スコアを加算し、難易度を上げる
+    // --- スコアと難易度の更新 ---
     score += 1;
     gameSpeed += gameSpeedIncrease;
+
+    // ★★★修正点★★★：障害物とアイテムの生成管理を分離
+    // 障害物の生成チェック
+    nextObstacleSpawnX -= gameSpeed;
+    if (nextObstacleSpawnX <= canvas.width) {
+        generateObstacles();
+    }
+
+    // アイテムの生成チェック
+    nextItemSpawnX -= gameSpeed;
+    if (nextItemSpawnX <= canvas.width) {
+        generateItems();
+    }
 
     // --- 画面外オブジェクトの削除 ---
     obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
@@ -176,9 +161,7 @@ function update() {
 
     // --- 当たり判定 ---
     obstacles.forEach(obs => {
-        if (checkCollision(player, obs)) {
-            player.health -= 0.5;
-        }
+        if (checkCollision(player, obs)) { player.health -= 0.5; }
     });
     
     items.forEach((item, index) => {
@@ -209,10 +192,8 @@ function update() {
 // ===================================
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     ctx.fillStyle = '#2E8B57';
     ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
-
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x, player.y, player.width, player.height);
 
@@ -224,7 +205,7 @@ function draw() {
 }
 
 // ===================================
-// ゲームループ
+// ゲームループ (変更なし)
 // ===================================
 function gameLoop() {
     update();
