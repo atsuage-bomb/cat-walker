@@ -50,7 +50,7 @@ const keys = {};
 // 2. ゲームの主要な関数
 // ===================================
 
-/** ゲームを開始する関数 */
+/** ゲームを開始する関数（一度だけ呼ばれる） */
 function startGame(isMobile) {
     if (gameState !== 'waiting') return; // ゲームが既に始まっている場合は何もしない
 
@@ -64,7 +64,7 @@ function startGame(isMobile) {
     }
 
     // BGM再生
-    bgm.play().catch(err => console.error("BGM再生に失敗:", err));
+    bgm.play().catch(err => console.error("BGM再生エラー:", err));
 
     // キーボード操作の受付を開始
     window.addEventListener('keydown', handleKeyDown);
@@ -99,7 +99,7 @@ function update() {
     if (player.health <= 0) {
         gameState = 'gameOver';
         gameOverDisplay.style.display = 'flex';
-        bgm.pause(); // ゲームオーバーでBGMを停止
+        bgm.pause();
     }
 }
 
@@ -114,8 +114,9 @@ function draw() {
     // 障害物とアイテム
     const allObjects = [...obstacles, ...items];
     allObjects.forEach(obj => { ctx.fillStyle = obj.color; ctx.fillRect(obj.x, obj.y, obj.width, obj.height); });
-    // UIの更新（描画ループ内で行うとスムーズ）
-    if (gameState === 'playing') {
+
+    // UIの更新
+    if (gameState === 'playing' || gameState === 'gameOver') {
         healthBarInner.style.width = `${Math.max(0, player.health)}%`;
         scoreDisplay.textContent = score;
     }
@@ -132,7 +133,7 @@ function generateObstacles() { const spawnX = nextObstacleSpawnX; if (Math.rando
 function generateItems() { const spawnX = nextItemSpawnX; items.push({ x: spawnX, y: GROUND_Y - 100, width: 20, height: 20, color: '#FF69B4', type: 'health', value: 20 }); const spawnInterval = Math.random() * 600 + 600; nextItemSpawnX = spawnX + spawnInterval; }
 
 // ===================================
-// 4. メインループとイベントリスナーの登録
+// 4. メインゲームループ
 // ===================================
 function gameLoop() {
     // 現在のゲーム状態に応じて処理を分岐
@@ -144,10 +145,14 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+// ===================================
+// 5. イベントリスナーの登録
+// ===================================
 // スタートボタンのイベントリスナー
 btnPc.addEventListener('click', () => startGame(false));
 btnSp.addEventListener('click', () => startGame(true));
 window.addEventListener('keydown', (e) => {
+    // ゲーム待機中にスペースキーが押されたらPCとしてスタート
     if (gameState === 'waiting' && e.code === 'Space') {
         e.preventDefault();
         startGame(false);
@@ -157,6 +162,7 @@ window.addEventListener('keydown', (e) => {
 // スマホ用タッチ操作のイベントリスナー
 function handleTouchStart(e, keyCode) {
     e.preventDefault();
+    // プレイ中以外は何もしない
     if (gameState !== 'playing') return;
     keys[keyCode] = true;
 }
@@ -178,5 +184,8 @@ btnJump.addEventListener('touchstart', (e) => handleTouchStart(e, 'Space'));
 btnJump.addEventListener('touchend', (e) => handleTouchEnd(e, 'Space'));
 window.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
-// ゲームループを開始
+// ===================================
+// 6. ゲームの開始
+// ===================================
+// ページが読み込まれたら、描画ループを開始する
 gameLoop();
