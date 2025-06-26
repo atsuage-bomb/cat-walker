@@ -103,8 +103,17 @@ const player = {
         obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
         items = items.filter(item => item.x + item.width > 0);
         
-        // 当たり判定
-        obstacles.forEach(obs => { if (checkCollision(player, obs)) { player.health -= 0.5; } });
+// 当たり判定
+    obstacles.forEach(obs => {
+        if (checkCollision(player, obs)) {
+            // ★★★修正点★★★: 敵の種類（色）によってダメージを変える
+            if (obs.color === '#228B22') { // もし緑色の敵なら
+                player.health -= 3.0; // ダメージ大
+            } else { // それ以外（茶色の敵）なら
+                player.health -= 0.5; // ダメージ小
+            }
+        }
+    });
         items.forEach((item, index) => { if (checkCollision(player, item)) { if (item.type === 'health') { player.health = Math.min(player.maxHealth, player.health + item.value); score += 50; items.splice(index, 1); } } });
         
         // ステータス更新
@@ -195,7 +204,7 @@ const player = {
     // ---- その他の補助関数 ----
     function checkCollision(rect1, rect2) { return rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.y + rect1.height > rect2.y; }
     function generateObstacles() { const spawnX = nextObstacleSpawnX; if (Math.random() < 0.5) { obstacles.push({ x: spawnX, y: GROUND_Y - 20, width: 40, height: 20, speed: -(gameSpeed + Math.random() * 2), color: '#228B22' }); } else { const obsHeight = Math.random() * 50 + 20; obstacles.push({ x: spawnX, y: GROUND_Y - obsHeight, width: 30, height: obsHeight, color: '#A52A2A' }); } const spawnInterval = Math.random() * 200 + 150; nextObstacleSpawnX = spawnX + spawnInterval; }
-    function generateItems() { const spawnX = nextItemSpawnX; items.push({ x: spawnX, y: GROUND_Y - 100, width: 20, height: 20, color: '#FF69B4', type: 'health', value: 20 }); const spawnInterval = Math.random() * 600 + 600; nextItemSpawnX = spawnX + spawnInterval; }
+    function generateItems() { const spawnX = nextItemSpawnX; items.push({ x: spawnX, y: GROUND_Y - 100, width: 20, height: 20, color: '#FF69B4', type: 'health', value: 10 }); const spawnInterval = Math.random() * 600 + 600; nextItemSpawnX = spawnX + spawnInterval; }
 
     // ===================================
     // 5. ゲーム全体の開始
