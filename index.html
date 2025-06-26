@@ -32,6 +32,18 @@
             <h2>GAME OVER</h2>
             <p>F5キーでリトライ</p>
         </div>
+
+        <div id="touch-controls">
+            <div class="touch-area left">
+                <button id="btn-left">←</button>
+            </div>
+            <div class="touch-area right">
+                <button id="btn-right">→</button>
+            </div>
+            <div class="touch-area jump">
+                <button id="btn-jump">JUMP</button>
+            </div>
+        </div>
     </div>
 
     <div id="info-wrapper">
@@ -60,47 +72,6 @@
             </div>
         </div>
     </div>
-
-    <script src="game.js"></script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ねこジャンプ！</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>ねこジャンプ！</h1>
-
-    <div id="game-container">
-        <div id="start-screen">
-            <h2>Press any key to start</h2>
-        </div>
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
-        <div id="ui-container">
-            </div>
-        <div id="game-over" style="display: none;">
-            </div>
-
-        <div id="touch-controls">
-            <div class="touch-area left">
-                <button id="btn-left">←</button>
-            </div>
-            <div class="touch-area right">
-                <button id="btn-right">→</button>
-            </div>
-            <div class="touch-area jump">
-                <button id="btn-jump">JUMP</button>
-            </div>
-        </div>
-        </div>
-
-    <div id="info-wrapper">
-        </div>
 
     <script src="game.js"></script>
 </body>
