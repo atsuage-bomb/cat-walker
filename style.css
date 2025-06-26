@@ -1,100 +1,54 @@
 /* ページ全体の基本設定 */
-html, body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
-    background-color: #f0f0f0;
-}
-body {
+html, body { /* (変更なし) */ }
+body { /* (変更なし) */ }
+h1 { /* (変更なし) */ }
+
+#game-wrapper { /* (変更なし) */ }
+#game-container { aspect-ratio: 800 / 400; /* (変更なし) */ }
+#gameCanvas { /* (変更なし) */ }
+
+/* ★★★修正点★★★: デバイス選択画面のスタイル */
+#device-select-screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    padding-bottom: 50px; /* 説明文が全部見えるように */
+    text-align: center;
+    z-index: 100;
 }
-h1 {
-    margin: 10px 0;
+#device-select-screen h2 { font-size: 28px; text-shadow: 2px 2px 8px #000; }
+#device-select-screen p { font-size: 18px; margin-top: 10px; }
+.device-buttons { margin-top: 25px; }
+.device-buttons button {
+    font-size: 18px;
+    padding: 12px 24px;
+    margin: 0 10px;
+    border: 2px solid white;
+    background-color: #333;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
+.device-buttons button:hover { background-color: #555; }
+#device-select-screen .start-message { font-size: 14px; margin-top: 20px; opacity: 0.8; }
 
-#game-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 800px; /* PCでの最大幅を800pxに固定 */
-    margin: 0 auto;
-}
 
-/* ★★★修正点★★★: aspect-ratioで比率を固定 */
-#game-container {
-    position: relative;
-    width: 100%;
-    border: 2px solid #333;
-    box-sizing: border-box;
-    background-color: #87CEEB;
-    aspect-ratio: 800 / 400; /* 常に2:1の比率を維持 */
-}
-
-/* ★★★修正点★★★: canvasをコンテナいっぱいに広げる */
-#gameCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-/* UI、ゲームオーバー、スタート画面のスタイル */
-#ui-container, #game-over, #start-screen {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    display: flex;
-}
-#ui-container { flex-direction: row; justify-content: space-between; padding: 10px; box-sizing: border-box; color: white; font-size: 20px; text-shadow: 2px 2px 4px #000; height: auto; }
-#game-over, #start-screen { flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-#health-bar-container { display: flex; align-items: center; }
-#health-bar { width: 200px; height: 20px; background-color: #555; border: 2px solid white; border-radius: 5px; margin-left: 10px; }
-#health-bar-inner { width: 100%; height: 100%; background-color: #7CFC00; border-radius: 2px; }
-#game-over { color: #c0392b; background-color: rgba(255, 255, 255, 0.8); }
-#start-screen { background-color: rgba(0, 0, 0, 0.6); color: white; }
-#start-screen h2, #game-over h2 { font-size: 28px; text-shadow: 2px 2px 8px #000; }
-#start-screen .start-message, #game-over p { font-size: 18px; margin-top: 10px; }
+/* UI、ゲームオーバー画面 */
+#ui-container, #game-over { /* (変更なし) */ }
+/* ... (既存のUI、ゲームオーバーのスタイルをここにペースト) */
 
 /* 操作ボタンのエリア */
-#touch-controls {
-    display: flex;
-    width: 100%;
-    height: 90px;
-    background-color: #333;
-    user-select: none; -webkit-user-select: none;
-}
-@media (min-width: 1024px) { #touch-controls { display: none; } }
-.touch-area { height: 100%; display: flex; align-items: center; justify-content: center; }
-.touch-area.left, .touch-area.right { width: 25%; }
-.touch-area.jump { width: 50%; }
-#touch-controls button { width: 65px; height: 65px; font-size: 24px; font-weight: bold; color: white; background-color: #555; border: 2px solid white; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
-#touch-controls button:active { background-color: #777; }
+#touch-controls { /* (変更なし) */ }
+/* ... (既存のタッチコントロールのスタイルをここにペースト) */
 
-/* 説明文のエリア */
-#info-wrapper {
-    width: 100%;
-    max-width: 800px;
-    padding: 10px;
-    box-sizing: border-box;
-    margin: 0 auto;
-}
-.controls-info { padding: 10px; background-color: #e9e9e9; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #333; font-size: 16px; text-align: center; margin-bottom: 15px; }
-.controls-info strong { font-weight: bold; color: #000; }
-.game-guide { padding: 15px 25px; background-color: #ffffff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: left; }
-.guide-section { margin-bottom: 20px; }
-.guide-section:last-child { margin-bottom: 5px; }
-.guide-section h3 { font-size: 18px; margin-bottom: 12px; padding-bottom: 5px; border-bottom: 2px solid #7CFC00; }
-.guide-section ul { padding-left: 25px; list-style-type: "⭐ "; }
-.guide-section li { padding-left: 5px; margin-bottom: 8px; line-height: 1.5; }
-.character-item { display: flex; align-items: center; margin-bottom: 12px; }
-.character-item .icon { display: inline-block; width: 20px; height: 20px; margin-right: 12px; border-radius: 4px; flex-shrink: 0; }
-.icon.cat { background-color: #FFD700; }
-.icon.obstacle-fixed { background-color: #A52A2A; }
-.icon.obstacle-moving { background-color: #228B22; }
-.icon.item-health { background-color: #FF69B4; }
+/* 説明文エリア */
+#info-wrapper { /* (変更なし) */ }
+/* ... (既存の説明文のスタイルをここにペースト) */
