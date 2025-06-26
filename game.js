@@ -4,6 +4,12 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// ★★★ここから追加★★★
+// ねこの画像を読み込む
+const playerImage = new Image();
+playerImage.src = 'cat.png'; // ファイル名が違う場合はここを修正
+// ★★★ここまで追加★★★
+
 const healthBarInner = document.getElementById('health-bar-inner');
 const scoreDisplay = document.getElementById('score');
 const gameOverDisplay = document.getElementById('game-over');
