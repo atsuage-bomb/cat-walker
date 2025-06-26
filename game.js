@@ -21,9 +21,9 @@ const GROUND_Y = canvas.height - 50; // 地面のY座標
 let gameSpeed = 3; 
 const gameSpeedIncrease = 0.001;
 
-// ★★★修正点★★★：障害物とアイテムの生成マーカーを完全に分離
+// 障害物とアイテムの生成マーカーを分離
 let nextObstacleSpawnX = canvas.width + 50; // 障害物用の生成マーカー
-let nextItemSpawnX = canvas.width + 500;   // アイテム用の生成マーカー（少し遅れてスタート）
+let nextItemSpawnX = canvas.width + 500;   // アイテム用の生成マーカー
 
 // ===================================
 // プレイヤー（猫）の設定
@@ -50,7 +50,7 @@ let obstacles = [];
 let items = [];
 
 // ===================================
-// 入力処理 (変更なし)
+// 入力処理
 // ===================================
 const keys = {};
 document.addEventListener('keydown', (e) => { keys[e.code] = true; });
@@ -67,7 +67,7 @@ function handleInput() {
 }
 
 // ===================================
-// 当たり判定関数 (変更なし)
+// 当たり判定関数
 // ===================================
 function checkCollision(rect1, rect2) {
     return rect1.x < rect2.x + rect2.width &&
@@ -76,29 +76,37 @@ function checkCollision(rect1, rect2) {
            rect1.y + rect1.height > rect2.y;
 }
 
-// ★★★修正点★★★：「障害物」を生成する専用の関数
+// ===================================
+// オブジェクト生成関数
+// ===================================
+
+// 「障害物」を生成する専用の関数
 function generateObstacles() {
     const spawnX = nextObstacleSpawnX;
     
     // 50%の確率で動く障害物、50%で通常の固定障害物を生成
     if (Math.random() < 0.5) {
+        // 動く障害物
         obstacles.push({
             x: spawnX, y: GROUND_Y - 20, width: 40, height: 20,
-            speed: -gameSpeed * (Math.random() * 0.5 + 0.8), color: '#228B22'
+            // 速度にランダム性を追加
+            speed: -(gameSpeed + Math.random() * 2), 
+            color: '#228B22'
         });
     } else {
+        // 通常の固定障害物
         const obsHeight = Math.random() * 50 + 20;
         obstacles.push({
             x: spawnX, y: GROUND_Y - obsHeight, width: 30, height: obsHeight, color: '#A52A2A'
         });
     }
 
-    // 次の"障害物"の生成マーカーを更新（間隔を短くして密度を上げる）
-    const spawnInterval = Math.random() * 200 + 150; // 150pxから350pxの間隔
+    // 次の"障害物"の生成マーカーを更新（密度を高く保つ）
+    const spawnInterval = Math.random() * 200 + 150;
     nextObstacleSpawnX = spawnX + spawnInterval;
 }
 
-// ★★★修正点★★★：「アイテム」を生成する専用の関数
+// 「アイテム」を生成する専用の関数
 function generateItems() {
     const spawnX = nextItemSpawnX;
     
@@ -107,8 +115,8 @@ function generateItems() {
         color: '#FF69B4', type: 'health', value: 20
     });
 
-    // 次の"アイテム"の生成マーカーを更新（障害物よりは長めの間隔で出現）
-    const spawnInterval = Math.random() * 500 + 400; // 400pxから900pxの間隔
+    // 次の"アイテム"の生成マーカーを更新（出現頻度を減らす）
+    const spawnInterval = Math.random() * 600 + 600;
     nextItemSpawnX = spawnX + spawnInterval;
 }
 
@@ -142,7 +150,7 @@ function update() {
     score += 1;
     gameSpeed += gameSpeedIncrease;
 
-    // ★★★修正点★★★：障害物とアイテムの生成管理を分離
+    // --- オブジェクト生成管理 ---
     // 障害物の生成チェック
     nextObstacleSpawnX -= gameSpeed;
     if (nextObstacleSpawnX <= canvas.width) {
@@ -188,7 +196,7 @@ function update() {
 }
 
 // ===================================
-// 描画処理 (変更なし)
+// 描画処理
 // ===================================
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -205,7 +213,7 @@ function draw() {
 }
 
 // ===================================
-// ゲームループ (変更なし)
+// ゲームループ
 // ===================================
 function gameLoop() {
     update();
