@@ -1,9 +1,7 @@
-/* ページ全体のスクロールを禁止する設定 */
+/* ★★★修正点★★★: ページ全体のレイアウトをシンプルに変更 */
 html, body {
-    height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
     font-family: 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
     background-color: #f0f0f0;
 }
@@ -14,31 +12,26 @@ body {
 }
 h1 {
     margin: 10px 0;
-    flex-shrink: 0;
 }
 
-/* ★★★修正点★★★: ゲームエリアとボタンエリアをまとめるラッパー */
 #game-wrapper {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 800px; /* PCでの最大幅 */
-    flex-shrink: 0;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 #game-container {
     position: relative;
     width: 100%;
-    /* アスペクト比を保つための設定 */
-    aspect-ratio: 800 / 400;
     border: 2px solid #333;
     box-sizing: border-box;
+    background-color: #87CEEB; /* 背景色をこちらに移動 */
 }
 
 #gameCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: block;
     width: 100%;
     height: 100%;
 }
@@ -54,13 +47,11 @@ h1 {
 #game-over { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #c0392b; background-color: rgba(255, 255, 255, 0.8); padding: 20px; border-radius: 10px; text-align: center; font-size: 24px; }
 #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 28px; text-shadow: 2px 2px 8px #000; }
 
-
-/* ★★★修正点★★★: 操作ボタンエリアのスタイルを全面的に見直し */
 #touch-controls {
     display: flex;
     width: 100%;
-    height: 90px; /* ボタンエリアの高さ */
-    background-color: #333; /* 背景色を追加 */
+    height: 90px;
+    background-color: #333;
     user-select: none;
     -webkit-user-select: none;
 }
@@ -72,17 +63,14 @@ h1 {
     }
 }
 
-
-/* (説明文エリアのスタイルは変更なし) */
 #info-wrapper {
-    flex: 1;
-    overflow-y: auto;
     width: 100%;
     max-width: 800px;
     padding: 10px;
     box-sizing: border-box;
+    margin: 0 auto;
 }
-/* ...以下、既存の説明文スタイルをそのままペースト... */
+/* (説明文エリアのスタイルは変更なし) */
 .controls-info { padding: 10px; background-color: #e9e9e9; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #333; font-size: 16px; text-align: center; margin-bottom: 15px; }
 .controls-info strong { font-weight: bold; color: #000; }
 .game-guide { padding: 15px 25px; background-color: #ffffff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: left; }
