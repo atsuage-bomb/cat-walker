@@ -3,95 +3,171 @@
 // ===================================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const gameContainer = document.getElementById('game-container');
 const startScreen = document.getElementById('start-screen');
-// (healthBar, score, gameOverDisplayの取得はそのまま)
+const healthBarInner = document.getElementById('health-bar-inner');
+const scoreDisplay = document.getElementById('score');
+const gameOverDisplay = document.getElementById('game-over');
 
-// ★★★修正点★★★: ゲーム世界の基準サイズを定数化
-const GAME_WORLD_WIDTH = 800;
-const GAME_WORLD_HEIGHT = 400;
+const playerImage = new Image();
+playerImage.src = 'cat.png';
 
-// (画像の読み込み、BGMの読み込みはそのまま)
-// (ゲームの状態変数、物理定数はそのまま)
+const bgm = new Audio('bgm.mp3');
+bgm.loop = true;
+bgm.volume = 0.3;
+let isBgmPlaying = false;
 
-// ★★★修正点★★★: GROUND_Yは動的に計算するため、ここでは初期化しない
-let GROUND_Y; 
+// ゲームの状態
+let score = 0;
+let gameOver = false;
+let gameRunning = true;
+let gameStarted = false;
 
-// (エンドレス化の設定、プレイヤーの設定、オブジェクト管理配列はそのまま)
+// 物理定数
+const GRAVITY = 0.5;
+const GROUND_Y = canvas.height - 50;
 
-// ★★★ここから下をすべて追加★★★
-// ===================================
-// Canvasサイズ調整
-// ===================================
-let scale = 1;
-function resizeCanvas() {
-    const screenWidth = gameContainer.clientWidth;
-    scale = screenWidth / GAME_WORLD_WIDTH;
+// エンドレス化のための設定
+let gameSpeed = 3;
+const gameSpeedIncrease = 0.001;
+let nextObstacleSpawnX = canvas.width + 50;
+let nextItemSpawnX = canvas.width + 500;
 
-    // canvasの描画バッファサイズを、アスペクト比を保ったまま更新
-    canvas.width = GAME_WORLD_WIDTH;
-    canvas.height = GAME_WORLD_HEIGHT;
+const player = {
+    x: 50, y: GROUND_Y, width: 30, height: 50,
+    speed: 5, velocityX: 0, velocityY: 0,
+    jumpPower: 12, isJumping: false,
+    health: 100, maxHealth: 100,
+};
 
-    // canvas要素の表示スタイルを更新（CSSでも設定しているが念のため）
-    canvas.style.width = screenWidth + 'px';
-    canvas.style.height = (GAME_WORLD_HEIGHT * scale) + 'px';
-    
-    // ゲームコンテナ自体の高さを設定
-    gameContainer.style.height = (GAME_WORLD_HEIGHT * scale) + 'px';
+let obstacles = [];
+let items = [];
 
-    // 地面のY座標を再計算
-    GROUND_Y = canvas.height - 50;
-    
-    // ゲームが始まっていない場合は、プレイヤーを地面に再配置
-    if (!gameStarted) {
-        player.y = GROUND_Y - player.height;
+// ★★★修正点★★★：ゲームを開始する専用の関数
+function startGame() {
+    if (gameStarted) return; // すでに始まっていたら何もしない
+    gameStarted = true;
+    startScreen.style.display = 'none';
+
+    if (!isBgmPlaying) {
+        bgm.play().catch(err => {
+            console.error("BGMの再生に失敗:", err);
+        });
+        isBgmPlaying = true;
     }
 }
 
+// ===================================
+// 入力処理
+// ===================================
+const keys = {};
+window.addEventListener('keydown', (e) => {
+    startGame();
+    if (e.code === 'Space') { e.preventDefault(); }
+    keys[e.code] = true;
+});
+window.addEventListener('keyup', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); }
+    keys[e.code] = false;
+});
 
 // ===================================
-// 入力処理 (変更なし)
+// 各種ゲーム関数
 // ===================================
-// (既存の入力処理コードをそのままここにペースト)
-
-
-// ===================================
-// 描画処理
-// ===================================
+function checkCollision(rect1, rect2) {
+    return rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.y + rect1.height > rect2.y;
+}
+function generateObstacles() {
+    const spawnX = nextObstacleSpawnX;
+    if (Math.random() < 0.5) { obstacles.push({ x: spawnX, y: GROUND_Y - 20, width: 40, height: 20, speed: -(gameSpeed + Math.random() * 2), color: '#228B22' });
+    } else { const obsHeight = Math.random() * 50 + 20; obstacles.push({ x: spawnX, y: GROUND_Y - obsHeight, width: 30, height: obsHeight, color: '#A52A2A' }); }
+    const spawnInterval = Math.random() * 200 + 150;
+    nextObstacleSpawnX = spawnX + spawnInterval;
+}
+function generateItems() {
+    const spawnX = nextItemSpawnX;
+    items.push({ x: spawnX, y: GROUND_Y - 100, width: 20, height: 20, color: '#FF69B4', type: 'health', value: 20 });
+    const spawnInterval = Math.random() * 600 + 600;
+    nextItemSpawnX = spawnX + spawnInterval;
+}
+function handleInput() {
+    if (keys['ArrowLeft'] && player.x > 0) { player.x -= player.speed; }
+    if (keys['ArrowRight'] && player.x < canvas.width - player.width) { player.x += player.speed; }
+    if (keys['Space'] && !player.isJumping) {
+        player.velocityY = -player.jumpPower;
+        player.isJumping = true;
+    }
+}
+function update() {
+    if (!gameStarted || !gameRunning) return;
+    handleInput();
+    player.velocityY += GRAVITY;
+    player.y += player.velocityY;
+    if (player.y + player.height > GROUND_Y) { player.y = GROUND_Y - player.height; player.velocityY = 0; player.isJumping = false; }
+    [obstacles, items].forEach(arr => { arr.forEach(obj => { obj.x -= gameSpeed; if (obj.speed) { obj.x += obj.speed; } }); });
+    score += 1;
+    gameSpeed += gameSpeedIncrease;
+    nextObstacleSpawnX -= gameSpeed;
+    if (nextObstacleSpawnX <= canvas.width) { generateObstacles(); }
+    nextItemSpawnX -= gameSpeed;
+    if (nextItemSpawnX <= canvas.width) { generateItems(); }
+    obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
+    items = items.filter(item => item.x + item.width > 0);
+    obstacles.forEach(obs => { if (checkCollision(player, obs)) { player.health -= 0.5; } });
+    items.forEach((item, index) => {
+        if (checkCollision(player, item)) {
+            if (item.type === 'health') { player.health = Math.min(player.maxHealth, player.health + item.value); score += 50; items.splice(index, 1); }
+        }
+    });
+    player.health -= 0.05;
+    healthBarInner.style.width = `${Math.max(0, player.health)}%`;
+    scoreDisplay.textContent = score;
+    if (player.health <= 0) { gameOver = true; gameRunning = false; gameOverDisplay.style.display = 'block'; }
+}
 function draw() {
-    // 描画を始める前に、画面をクリア
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 地面を描画
     ctx.fillStyle = '#2E8B57';
     ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
-
-    // プレイヤーを描画
     ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
-    
-    // 障害物とアイテムを描画
     const allObjects = [...obstacles, ...items];
-    allObjects.forEach(obj => {
-        ctx.fillStyle = obj.color;
-        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-    });
+    allObjects.forEach(obj => { ctx.fillStyle = obj.color; ctx.fillRect(obj.x, obj.y, obj.width, obj.height); });
 }
-// ★★★ここまで修正★★★ (以下の既存のコードは、 resizeCanvas の呼び出し以外はそのまま)
-
-
-// ===================================
-// ゲームループ
-// ===================================
 function gameLoop() {
     update();
     draw();
     requestAnimationFrame(gameLoop);
 }
-
-// ★★★修正点★★★: ゲーム開始前に一度サイズ調整を実行し、リサイズイベントにも対応
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas(); 
-
 gameLoop();
 
-// (スマホ用タッチ操作のロジックはそのまま)
+// ===================================
+// スマホ用タッチ操作のロジック
+// ===================================
+const btnLeft = document.getElementById('btn-left');
+const btnRight = document.getElementById('btn-right');
+const btnJump = document.getElementById('btn-jump');
+function handleTouchStart(e, keyCode) {
+    e.preventDefault();
+    if (!gameStarted) return; // ゲームが始まってなければ操作しない
+    keys[keyCode] = true;
+}
+function handleTouchEnd(e, keyCode) {
+    e.preventDefault();
+    keys[keyCode] = false;
+}
+btnLeft.addEventListener('mousedown', (e) => handleTouchStart(e, 'ArrowLeft'));
+btnLeft.addEventListener('mouseup', (e) => handleTouchEnd(e, 'ArrowLeft'));
+btnLeft.addEventListener('touchstart', (e) => handleTouchStart(e, 'ArrowLeft'));
+btnLeft.addEventListener('touchend', (e) => handleTouchEnd(e, 'ArrowLeft'));
+btnRight.addEventListener('mousedown', (e) => handleTouchStart(e, 'ArrowRight'));
+btnRight.addEventListener('mouseup', (e) => handleTouchEnd(e, 'ArrowRight'));
+btnRight.addEventListener('touchstart', (e) => handleTouchStart(e, 'ArrowRight'));
+btnRight.addEventListener('touchend', (e) => handleTouchEnd(e, 'ArrowRight'));
+btnJump.addEventListener('mousedown', (e) => handleTouchStart(e, 'Space'));
+btnJump.addEventListener('mouseup', (e) => handleTouchEnd(e, 'Space'));
+btnJump.addEventListener('touchstart', (e) => handleTouchStart(e, 'Space'));
+btnJump.addEventListener('touchend', (e) => handleTouchEnd(e, 'Space'));
+
+// ★★★修正点★★★: スタート画面自体をタップしてもゲームが始まるようにする
+startScreen.addEventListener('touchstart', startGame, { once: true });
+startScreen.addEventListener('mousedown', startGame, { once: true });
+
+window.addEventListener('contextmenu', function (e) { e.preventDefault(); });
