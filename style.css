@@ -3,117 +3,89 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* これが最重要！スクロールバーを強制的に消す */
+    overflow: hidden;
     font-family: 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
     background-color: #f0f0f0;
 }
-
-/* Flexboxでページ全体のレイアウトを管理 */
 body {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-
 h1 {
     margin: 10px 0;
-    flex-shrink: 0; /* h1が縮まないように */
+    flex-shrink: 0;
+}
+
+/* ★★★修正点★★★: ゲームエリアとボタンエリアをまとめるラッパー */
+#game-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px; /* PCでの最大幅 */
+    flex-shrink: 0;
 }
 
 #game-container {
     position: relative;
+    width: 100%;
+    /* アスペクト比を保つための設定 */
+    aspect-ratio: 800 / 400;
     border: 2px solid #333;
-    flex-shrink: 0; /* ゲーム画面が縮まないように */
-    width: 800px;
-    max-width: 100%;
+    box-sizing: border-box;
 }
 
 #gameCanvas {
-    background-color: #87CEEB;
-    display: block;
-    /* canvasの幅をコンテナに合わせる */
-    width: 100%;
-    height: auto;
-}
-
-#ui-container {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    display: flex;
-    justify-content: space-between;
-    color: white;
-    font-size: 20px;
-    text-shadow: 2px 2px 4px #000;
-}
-
-#health-bar-container { display: flex; align-items: center; }
-#health-bar { width: 200px; height: 20px; background-color: #555; border: 2px solid white; border-radius: 5px; margin-left: 10px; }
-#health-bar-inner { width: 100%; height: 100%; background-color: #7CFC00; border-radius: 2px; }
-
-#game-over {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #c0392b;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    font-size: 24px;
-}
-
-#start-screen {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-size: 28px;
-    text-shadow: 2px 2px 8px #000;
 }
 
-/* 説明文エリア全体を囲むラッパー */
+/* (UI、ゲームオーバー、スタート画面のスタイルは変更なし) */
+#ui-container, #game-over, #start-screen {
+    /* (既存のスタイルをそのままここにペースト) */
+}
+#ui-container { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; color: white; font-size: 20px; text-shadow: 2px 2px 4px #000; }
+#health-bar-container { display: flex; align-items: center; }
+#health-bar { width: 200px; height: 20px; background-color: #555; border: 2px solid white; border-radius: 5px; margin-left: 10px; }
+#health-bar-inner { width: 100%; height: 100%; background-color: #7CFC00; border-radius: 2px; }
+#game-over { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #c0392b; background-color: rgba(255, 255, 255, 0.8); padding: 20px; border-radius: 10px; text-align: center; font-size: 24px; }
+#start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-size: 28px; text-shadow: 2px 2px 8px #000; }
+
+
+/* ★★★修正点★★★: 操作ボタンエリアのスタイルを全面的に見直し */
+#touch-controls {
+    display: flex;
+    width: 100%;
+    height: 90px; /* ボタンエリアの高さ */
+    background-color: #333; /* 背景色を追加 */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* PCではタッチボタンを非表示にする */
+@media (min-width: 1024px) {
+    #touch-controls {
+        display: none;
+    }
+}
+
+
+/* (説明文エリアのスタイルは変更なし) */
 #info-wrapper {
-    flex: 1; /* 残りのスペースをすべて使う */
-    overflow-y: auto; /* このエリア内だけスクロールを許可 */
+    flex: 1;
+    overflow-y: auto;
     width: 100%;
     max-width: 800px;
     padding: 10px;
-    box-sizing: border-box; /* paddingを含めてサイズ計算 */
+    box-sizing: border-box;
 }
-
-.controls-info {
-    padding: 10px;
-    background-color: #e9e9e9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    color: #333;
-    font-size: 16px;
-    text-align: center;
-    margin-bottom: 15px;
-}
-
+/* ...以下、既存の説明文スタイルをそのままペースト... */
+.controls-info { padding: 10px; background-color: #e9e9e9; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #333; font-size: 16px; text-align: center; margin-bottom: 15px; }
 .controls-info strong { font-weight: bold; color: #000; }
-
-.game-guide {
-    padding: 15px 25px;
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    text-align: left;
-}
-
+.game-guide { padding: 15px 25px; background-color: #ffffff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: left; }
 .guide-section { margin-bottom: 20px; }
 .guide-section:last-child { margin-bottom: 5px; }
 .guide-section h3 { font-size: 18px; margin-bottom: 12px; padding-bottom: 5px; border-bottom: 2px solid #7CFC00; }
@@ -125,41 +97,9 @@ h1 {
 .icon.obstacle-fixed { background-color: #A52A2A; }
 .icon.obstacle-moving { background-color: #228B22; }
 .icon.item-health { background-color: #FF69B4; }
-
-/* スマホ用タッチ操作ボタン */
-#touch-controls {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100px; /* ボタンエリアの高さ */
-    display: flex;
-    opacity: 0.5;
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-.touch-area {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+.touch-area { height: 100%; display: flex; align-items: center; justify-content: center; }
 .touch-area.left { width: 25%; }
 .touch-area.right { width: 25%; }
 .touch-area.jump { width: 50%; }
-
-#touch-controls button {
-    width: 70px;
-    height: 70px;
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
-    background-color: #333;
-    border: 2px solid white;
-    border-radius: 50%;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-}
-#touch-controls button:active {
-    background-color: #555;
-}
+#touch-controls button { width: 65px; height: 65px; font-size: 24px; font-weight: bold; color: white; background-color: #555; border: 2px solid white; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
+#touch-controls button:active { background-color: #777; }
