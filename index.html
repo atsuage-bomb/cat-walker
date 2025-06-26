@@ -10,7 +10,12 @@
     <h1>ねこジャンプ！</h1>
 
     <div id="game-container">
+        <div id="start-screen">
+            <h2>Press any key to start</h2>
+        </div>
+
         <canvas id="gameCanvas" width="800" height="400"></canvas>
+
         <div id="ui-container">
             <div id="health-bar-container">
                 <span>たいりょく:</span>
@@ -22,6 +27,7 @@
                 スコア: <span id="score">0</span>
             </div>
         </div>
+
         <div id="game-over" style="display: none;">
             <h2>GAME OVER</h2>
             <p>F5キーでリトライ</p>
