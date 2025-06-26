@@ -1,4 +1,4 @@
-/* ★★★修正点★★★: ページ全体のスクロールを禁止する設定 */
+/* ページ全体のスクロールを禁止する設定 */
 html, body {
     height: 100%;
     margin: 0;
@@ -8,7 +8,7 @@ html, body {
     background-color: #f0f0f0;
 }
 
-/* ★★★修正点★★★: Flexboxでページ全体のレイアウトを管理 */
+/* Flexboxでページ全体のレイアウトを管理 */
 body {
     display: flex;
     flex-direction: column;
@@ -24,11 +24,16 @@ h1 {
     position: relative;
     border: 2px solid #333;
     flex-shrink: 0; /* ゲーム画面が縮まないように */
+    width: 800px;
+    max-width: 100%;
 }
 
 #gameCanvas {
     background-color: #87CEEB;
     display: block;
+    /* canvasの幅をコンテナに合わせる */
+    width: 100%;
+    height: auto;
 }
 
 #ui-container {
@@ -60,12 +65,29 @@ h1 {
     font-size: 24px;
 }
 
-/* ★★★修正点★★★: 説明文エリア全体を囲むラッパー */
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 28px;
+    text-shadow: 2px 2px 8px #000;
+}
+
+/* 説明文エリア全体を囲むラッパー */
 #info-wrapper {
     flex: 1; /* 残りのスペースをすべて使う */
     overflow-y: auto; /* このエリア内だけスクロールを許可 */
     width: 100%;
-    max-width: 800px; /* ゲーム画面の幅に合わせる */
+    max-width: 800px;
     padding: 10px;
     box-sizing: border-box; /* paddingを含めてサイズ計算 */
 }
@@ -104,29 +126,40 @@ h1 {
 .icon.obstacle-moving { background-color: #228B22; }
 .icon.item-health { background-color: #FF69B4; }
 
-/* (既存のスタイルはそのまま) */
-
-#game-over {
-    /* (既存のスタイルはそのまま) */
-}
-
-/* ★★★ここから追加★★★ */
-#start-screen {
+/* スマホ用タッチ操作ボタン */
+#touch-controls {
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
     width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
+    height: 100px; /* ボタンエリアの高さ */
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-size: 28px;
-    text-shadow: 2px 2px 8px #000;
+    opacity: 0.5;
+    user-select: none;
+    -webkit-user-select: none;
 }
-/* ★★★ここまで追加★★★ */
 
-/* (説明文エリアのスタイルはそのまま) */
+.touch-area {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.touch-area.left { width: 25%; }
+.touch-area.right { width: 25%; }
+.touch-area.jump { width: 50%; }
+
+#touch-controls button {
+    width: 70px;
+    height: 70px;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    background-color: #333;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+#touch-controls button:active {
+    background-color: #555;
+}
