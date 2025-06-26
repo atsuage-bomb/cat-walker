@@ -34,36 +34,60 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ねこジャンプ！</title>
+    <link rel="stylesheet" href="style.css">
+</head>
 <body>
     <h1>ねこジャンプ！</h1>
-    <div id="game-container">
-        </div>
 
-    <div class="controls-info">
-        <p><strong>操作方法:</strong> ← → キーで移動 / スペースキーでジャンプ</p>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <div id="ui-container">
+            <div id="health-bar-container">
+                <span>たいりょく:</span>
+                <div id="health-bar">
+                    <div id="health-bar-inner"></div>
+                </div>
+            </div>
+            <div id="score-container">
+                スコア: <span id="score">0</span>
+            </div>
+        </div>
+        <div id="game-over" style="display: none;">
+            <h2>GAME OVER</h2>
+            <p>F5キーでリトライ</p>
+        </div>
     </div>
 
-    <div class="game-guide">
-        <div class="guide-section">
-            <h3>ゲームルール</h3>
-            <ul>
-                <li>ねこを操作して、障害物をよけながらハイスコアを目指そう！</li>
-                <li>時間がたったり、障害物に当たると体力がへるよ。</li>
-                <li>体力がゼロになったらゲームオーバー。</li>
-                <li>ゲームはどんどんスピードアップ！どこまで進めるかな？</li>
-            </ul>
+    <div id="info-wrapper">
+        <div class="controls-info">
+            <p><strong>操作方法:</strong> ← → キーで移動 / スペースキーでジャンプ</p>
         </div>
-        <div class="guide-section">
-            <h3>キャラクターとアイテム</h3>
-            <div class="character-list">
-                <div class="character-item"><span class="icon cat"></span><strong>ねこ (あなた):</strong> ジャンプが得意な主人公。</div>
-                <div class="character-item"><span class="icon obstacle-fixed"></span><strong>障害物 (茶色):</strong> 動かない障害物。あたると少し体力がへる。</div>
-                <div class="character-item"><span class="icon obstacle-moving"></span><strong>動く障害物 (緑色):</strong> 左右に動くやっかいな敵。あたると少し体力がへる。</div>
-                <div class="character-item"><span class="icon item-health"></span><strong>おやつ (ピンク色):</strong> ねこの大好物。とると体力が回復してスコアもアップ！</div>
+
+        <div class="game-guide">
+            <div class="guide-section">
+                <h3>ゲームルール</h3>
+                <ul>
+                    <li>ねこを操作して、障害物をよけながらハイスコアを目指そう！</li>
+                    <li>時間がたったり、障害物に当たると体力がへるよ。</li>
+                    <li>体力がゼロになったらゲームオーバー。</li>
+                    <li>ゲームはどんどんスピードアップ！どこまで進めるかな？</li>
+                </ul>
+            </div>
+            <div class="guide-section">
+                <h3>キャラクターとアイテム</h3>
+                <div class="character-list">
+                    <div class="character-item"><span class="icon cat"></span><strong>ねこ (あなた):</strong> ジャンプが得意な主人公。</div>
+                    <div class="character-item"><span class="icon obstacle-fixed"></span><strong>障害物 (茶色):</strong> 動かない障害物。あたると少し体力がへる。</div>
+                    <div class="character-item"><span class="icon obstacle-moving"></span><strong>動く障害物 (緑色):</strong> 左右に動くやっかいな敵。あたると少し体力がへる。</div>
+                    <div class="character-item"><span class="icon item-health"></span><strong>おやつ (ピンク色):</strong> ねこの大好物。とると体力が回復してスコアもアップ！</div>
+                </div>
             </div>
         </div>
     </div>
+
     <script src="game.js"></script>
 </body>
 </html>
