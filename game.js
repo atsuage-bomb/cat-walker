@@ -4,11 +4,15 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// ★★★ここから追加★★★
 // ねこの画像を読み込む
 const playerImage = new Image();
 playerImage.src = 'cat.png'; // ファイル名が違う場合はここを修正
-// ★★★ここまで追加★★★
+
+// BGMを読み込む
+const bgm = new Audio('bgm.mp3'); // ファイル名が違う場合はここを修正
+bgm.loop = true; // BGMをループ再生する設定
+bgm.volume = 0.3; // 音量を30%に設定（大きすぎるのを防ぐ）
+let isBgmPlaying = false; // BGMが再生中かを管理する変数
 
 const healthBarInner = document.getElementById('health-bar-inner');
 const scoreDisplay = document.getElementById('score');
@@ -62,6 +66,13 @@ const keys = {};
 
 // ★★★修正点★★★: documentからwindowに変更し、より確実にイベントを捕捉
 window.addEventListener('keydown', (e) => {
+
+    // BGMがまだ再生されていなければ、再生を開始する
+    if (!isBgmPlaying) {
+        bgm.play();
+        isBgmPlaying = true;
+    }
+    
     // スペースキーが押された場合、ページのスクロールを強力に防ぐ
     if (e.code === 'Space') {
         e.preventDefault();
