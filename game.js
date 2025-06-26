@@ -17,6 +17,11 @@ let gameRunning = true;
 const GRAVITY = 0.5;
 const GROUND_Y = canvas.height - 50; // 地面のY座標
 
+// ★変更点：エンドレス化のための設定
+let gameSpeed = 3; // ゲームの初期スクロール速度
+const gameSpeedIncrease = 0.001; // スピードの増加量
+let nextSpawnX = canvas.width; // 次にオブジェクトを生成するX座標の閾値
+
 // ===================================
 // プレイヤー（猫）の設定
 // ===================================
@@ -36,35 +41,14 @@ const player = {
 };
 
 // ===================================
-// ゲームオブジェクトの定義
+// ゲームオブジェクトの管理配列
 // ===================================
-// 固定障害物
-const fixedObstacles = [
-    { x: 300, y: GROUND_Y - 40, width: 40, height: 40, color: '#A52A2A' },
-    { x: 600, y: GROUND_Y - 60, width: 20, height: 60, color: '#A52A2A' },
-    { x: 1000, y: GROUND_Y - 50, width: 50, height: 50, color: '#A52A2A' }
-];
-
-// 動く障害物（敵）
-const movingObstacles = [
-    { x: 800, y: GROUND_Y - 30, width: 50, height: 30, speed: -2, color: '#8B4513' }, // 猛獣
-    { x: 1200, y: GROUND_Y - 20, width: 40, height: 20, speed: -1, color: '#228B22' } // ヘビ
-];
-
-// アイテム（おやつ）
-const items = [
-    { x: 450, y: GROUND_Y - 80, width: 20, height: 20, color: '#FF69B4', type: 'health', value: 20 },
-    { x: 900, y: GROUND_Y - 30, width: 20, height: 20, color: '#FF69B4', type: 'health', value: 20 }
-];
-
-// チェックポイント
-const checkpoints = [
-    { x: 700, y: GROUND_Y - 100, width: 10, height: 100, color: 'rgba(0, 255, 0, 0.5)', passed: false, bonus: 100 }
-];
-
+// ★変更点：開始時のオブジェクトは空か少量にして、動的に生成する
+let obstacles = [];
+let items = [];
 
 // ===================================
-// 入力処理
+// 入力処理 (変更なし)
 // ===================================
 const keys = {};
 document.addEventListener('keydown', (e) => {
@@ -77,12 +61,13 @@ document.addEventListener('keyup', (e) => {
 function handleInput() {
     if (gameOver) return;
 
+    // ★変更点：プレイヤーが画面内を自由に動けるようにする
     // 左移動
     if (keys['ArrowLeft'] && player.x > 0) {
         player.x -= player.speed;
     }
     // 右移動
-    if (keys['ArrowRight'] && player.x < canvas.width / 3) { // 画面の1/3以上右には進めず、背景が動く
+    if (keys['ArrowRight'] && player.x < canvas.width - player.width) {
         player.x += player.speed;
     }
     // ジャンプ
@@ -93,13 +78,52 @@ function handleInput() {
 }
 
 // ===================================
-// 当たり判定関数
+// 当たり判定関数 (変更なし)
 // ===================================
 function checkCollision(rect1, rect2) {
     return rect1.x < rect2.x + rect2.width &&
            rect1.x + rect1.width > rect2.x &&
            rect1.y < rect2.y + rect2.height &&
            rect1.y + rect1.height > rect2.y;
+}
+
+// ★追加：オブジェクトをランダムに生成する関数
+function generateObjects() {
+    // 次の生成ポイントをランダムに決定
+    const spawnInterval = Math.random() * 400 + 200; // 200pxから600pxの間隔
+    nextSpawnX += spawnInterval;
+
+    // 確率で何を生成するか決める
+    const rand = Math.random();
+    if (rand < 0.6) { // 60%の確率で障害物
+        const obsHeight = Math.random() * 40 + 20; // 高さをランダムに
+        obstacles.push({
+            x: nextSpawnX,
+            y: GROUND_Y - obsHeight,
+            width: 30,
+            height: obsHeight,
+            color: '#A52A2A'
+        });
+    } else if (rand < 0.8) { // 20%の確率で動く障害物
+         obstacles.push({
+            x: nextSpawnX,
+            y: GROUND_Y - 20,
+            width: 40,
+            height: 20,
+            speed: -gameSpeed * (Math.random() * 0.5 + 0.8), // 速度も少しランダムに
+            color: '#228B22'
+        });
+    } else { // 20%の確率で回復アイテム
+        items.push({
+            x: nextSpawnX,
+            y: GROUND_Y - 80, // アイテムはジャンプで取る位置に
+            width: 20,
+            height: 20,
+            color: '#FF69B4',
+            type: 'health',
+            value: 20
+        });
+    }
 }
 
 // ===================================
@@ -121,26 +145,34 @@ function update() {
         player.isJumping = false;
     }
 
-    // --- 背景スクロール ---
-    if (keys['ArrowRight'] && player.x >= canvas.width / 3) {
-        const scrollSpeed = player.speed;
-        score += 1; // 進行度でスコアアップ
-        [fixedObstacles, movingObstacles, items, checkpoints].forEach(arr => {
-            arr.forEach(obj => obj.x -= scrollSpeed);
+    // ★変更点：自動スクロールとオブジェクト管理
+    // 全てのオブジェクトを左にスクロールさせる
+    [obstacles, items].forEach(arr => {
+        arr.forEach(obj => {
+            obj.x -= gameSpeed;
+            // 動く障害物は自身の速度も加算
+            if (obj.speed) {
+                obj.x += obj.speed;
+            }
         });
-    }
-
-    // --- オブジェクトの更新と当たり判定 ---
-    // 動く障害物
-    movingObstacles.forEach(obs => {
-        obs.x += obs.speed;
-        if (checkCollision(player, obs)) {
-            player.health -= 0.5;
-        }
     });
 
-    // 固定障害物
-    fixedObstacles.forEach(obs => {
+    // スコアを加算し、難易度を上げる
+    score += 1;
+    gameSpeed += gameSpeedIncrease;
+
+    // ★変更点：画面外に出たオブジェクトを配列から削除してメモリを節約
+    obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
+    items = items.filter(item => item.x + item.width > 0);
+
+    // ★変更点：一定距離進んだら新しいオブジェクトを生成
+    if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width) {
+        generateObjects();
+    }
+    
+    // --- 当たり判定 ---
+    // 障害物
+    obstacles.forEach(obs => {
         if (checkCollision(player, obs)) {
             player.health -= 0.5;
         }
@@ -151,26 +183,15 @@ function update() {
         if (checkCollision(player, item)) {
             if (item.type === 'health') {
                 player.health = Math.min(player.maxHealth, player.health + item.value);
-                score += 50; // アイテム獲得ボーナス
+                score += 50;
                 items.splice(index, 1); // アイテムを消す
             }
         }
     });
 
-    // チェックポイント
-    checkpoints.forEach(cp => {
-        if (!cp.passed && checkCollision(player, cp)) {
-            cp.passed = true;
-            player.health = player.maxHealth; // 体力全回復
-            score += cp.bonus;
-        }
-    });
-
     // --- 体力とスコアの更新 ---
-    // 時間経過で体力が減る
-    player.health -= 0.05;
+    player.health -= 0.05; // 時間経過で体力が減る
     
-    // UIの更新
     healthBarInner.style.width = `${Math.max(0, player.health)}%`;
     scoreDisplay.textContent = score;
 
@@ -186,25 +207,20 @@ function update() {
 // 描画処理
 // ===================================
 function draw() {
-    // 画面をクリア
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 地面を描画
-    ctx.fillStyle = '#2E8B57'; // 地面の色
+    ctx.fillStyle = '#2E8B57';
     ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
 
-    // プレイヤーを描画
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x, player.y, player.width, player.height);
 
-    // 各オブジェクトを描画
-    const allObjects = [...fixedObstacles, ...movingObstacles, ...items, ...checkpoints];
+    const allObjects = [...obstacles, ...items];
     allObjects.forEach(obj => {
         ctx.fillStyle = obj.color;
         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
     });
 }
-
 
 // ===================================
 // ゲームループ
