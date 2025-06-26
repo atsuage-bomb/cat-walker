@@ -3,57 +3,45 @@
 // ===================================
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
 const startScreen = document.getElementById('start-screen');
-
-// ねこの画像を読み込む
-const playerImage = new Image();
-playerImage.src = 'cat.png'; // ファイル名が違う場合はここを修正
-
-// BGMを読み込む
-const bgm = new Audio('bgm.mp3'); // ファイル名が違う場合はここを修正
-bgm.loop = true; // BGMをループ再生する設定
-bgm.volume = 0.3; // 音量を30%に設定（大きすぎるのを防ぐ）
-let isBgmPlaying = false; // BGMが再生中かを管理する変数
-
 const healthBarInner = document.getElementById('health-bar-inner');
 const scoreDisplay = document.getElementById('score');
 const gameOverDisplay = document.getElementById('game-over');
+
+// ねこの画像を読み込む
+const playerImage = new Image();
+playerImage.src = 'cat.png';
+
+// BGMを読み込む
+const bgm = new Audio('bgm.mp3');
+bgm.loop = true;
+bgm.volume = 0.3;
+let isBgmPlaying = false;
 
 // ゲームの状態
 let score = 0;
 let gameOver = false;
 let gameRunning = true;
-let gameStarted = false; // ゲームが開始したかを管理する変数
+let gameStarted = false;
 
 // 物理定数
 const GRAVITY = 0.5;
-const GROUND_Y = canvas.height - 50; // 地面のY座標
+const GROUND_Y = canvas.height - 50;
 
 // エンドレス化のための設定
-let gameSpeed = 3; 
+let gameSpeed = 3;
 const gameSpeedIncrease = 0.001;
-
-// 障害物とアイテムの生成マーカーを分離
-let nextObstacleSpawnX = canvas.width + 50; // 障害物用の生成マーカー
-let nextItemSpawnX = canvas.width + 500;   // アイテム用の生成マーカー
+let nextObstacleSpawnX = canvas.width + 50;
+let nextItemSpawnX = canvas.width + 500;
 
 // ===================================
 // プレイヤー（猫）の設定
 // ===================================
 const player = {
-    x: 50,
-    y: GROUND_Y,
-    width: 30,
-    height: 50,
-    speed: 5,
-    velocityX: 0,
-    velocityY: 0,
-    jumpPower: 12,
-    isJumping: false,
-    health: 100,
-    maxHealth: 100,
-    color: '#FFD700'
+    x: 50, y: GROUND_Y, width: 30, height: 50,
+    speed: 5, velocityX: 0, velocityY: 0,
+    jumpPower: 12, isJumping: false,
+    health: 100, maxHealth: 100,
 };
 
 // ===================================
@@ -66,48 +54,22 @@ let items = [];
 // 入力処理 (スクロール対策強化版)
 // ===================================
 const keys = {};
-
-// ★★★修正点★★★: documentからwindowに変更し、より確実にイベントを捕捉
 window.addEventListener('keydown', (e) => {
-
-    // まだゲームが始まっていなければ、ゲームを開始する
     if (!gameStarted) {
         gameStarted = true;
-        startScreen.style.display = 'none'; // スタート画面を非表示に
+        startScreen.style.display = 'none';
     }
-    // ★★★ここまで追加★★★
-
-    // BGMがまだ再生されていなければ、再生を開始する
     if (!isBgmPlaying) {
-        bgm.play();
+        bgm.play().catch(err => console.log("BGMの再生に失敗:", err));
         isBgmPlaying = true;
     }
-    
-    // スペースキーが押された場合、ページのスクロールを強力に防ぐ
-    if (e.code === 'Space') {
-        e.preventDefault();
-    }
+    if (e.code === 'Space') { e.preventDefault(); }
     keys[e.code] = true;
 });
-
-// ★★★修正点★★★: keyupイベントリスナーもwindowに変更し、スクロール防止を追加
 window.addEventListener('keyup', (e) => {
-    // こちらにも念のため追加
-    if (e.code === 'Space') {
-        e.preventDefault();
-    }
+    if (e.code === 'Space') { e.preventDefault(); }
     keys[e.code] = false;
 });
-
-function handleInput() {
-    if (gameOver) return;
-    if (keys['ArrowLeft'] && player.x > 0) { player.x -= player.speed; }
-    if (keys['ArrowRight'] && player.x < canvas.width - player.width) { player.x += player.speed; }
-    if (keys['Space'] && !player.isJumping) {
-        player.velocityY = -player.jumpPower;
-        player.isJumping = true;
-    }
-}
 
 // ===================================
 // 当たり判定関数
@@ -122,57 +84,38 @@ function checkCollision(rect1, rect2) {
 // ===================================
 // オブジェクト生成関数
 // ===================================
-
-// 「障害物」を生成する専用の関数
 function generateObstacles() {
     const spawnX = nextObstacleSpawnX;
-    
-    // 50%の確率で動く障害物、50%で通常の固定障害物を生成
     if (Math.random() < 0.5) {
-        // 動く障害物
         obstacles.push({
             x: spawnX, y: GROUND_Y - 20, width: 40, height: 20,
-            // 速度にランダム性を追加
-            speed: -(gameSpeed + Math.random() * 2), 
-            color: '#228B22'
+            speed: -(gameSpeed + Math.random() * 2), color: '#228B22'
         });
     } else {
-        // 通常の固定障害物
         const obsHeight = Math.random() * 50 + 20;
         obstacles.push({
             x: spawnX, y: GROUND_Y - obsHeight, width: 30, height: obsHeight, color: '#A52A2A'
         });
     }
-
-    // 次の"障害物"の生成マーカーを更新（密度を高く保つ）
     const spawnInterval = Math.random() * 200 + 150;
     nextObstacleSpawnX = spawnX + spawnInterval;
 }
-
-// 「アイテム」を生成する専用の関数
 function generateItems() {
     const spawnX = nextItemSpawnX;
-    
     items.push({
         x: spawnX, y: GROUND_Y - 100, width: 20, height: 20,
         color: '#FF69B4', type: 'health', value: 20
     });
-
-    // 次の"アイテム"の生成マーカーを更新（出現頻度を減らす）
     const spawnInterval = Math.random() * 600 + 600;
     nextItemSpawnX = spawnX + spawnInterval;
 }
-
 
 // ===================================
 // ゲームの更新処理
 // ===================================
 function update() {
-    if (!gameStarted || !gameRunning) return; // ゲームが始まっていないか、終わっていたら処理をしない
-
+    if (!gameStarted || !gameRunning) return;
     handleInput();
-
-    // --- プレイヤーの更新 ---
     player.velocityY += GRAVITY;
     player.y += player.velocityY;
     if (player.y + player.height > GROUND_Y) {
@@ -180,41 +123,21 @@ function update() {
         player.velocityY = 0;
         player.isJumping = false;
     }
-
-    // --- 自動スクロール ---
     [obstacles, items].forEach(arr => {
         arr.forEach(obj => {
             obj.x -= gameSpeed;
             if (obj.speed) { obj.x += obj.speed; }
         });
     });
-
-    // --- スコアと難易度の更新 ---
     score += 1;
     gameSpeed += gameSpeedIncrease;
-
-    // --- オブジェクト生成管理 ---
-    // 障害物の生成チェック
     nextObstacleSpawnX -= gameSpeed;
-    if (nextObstacleSpawnX <= canvas.width) {
-        generateObstacles();
-    }
-
-    // アイテムの生成チェック
+    if (nextObstacleSpawnX <= canvas.width) { generateObstacles(); }
     nextItemSpawnX -= gameSpeed;
-    if (nextItemSpawnX <= canvas.width) {
-        generateItems();
-    }
-
-    // --- 画面外オブジェクトの削除 ---
+    if (nextItemSpawnX <= canvas.width) { generateItems(); }
     obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
     items = items.filter(item => item.x + item.width > 0);
-
-    // --- 当たり判定 ---
-    obstacles.forEach(obs => {
-        if (checkCollision(player, obs)) { player.health -= 0.5; }
-    });
-    
+    obstacles.forEach(obs => { if (checkCollision(player, obs)) { player.health -= 0.5; } });
     items.forEach((item, index) => {
         if (checkCollision(player, item)) {
             if (item.type === 'health') {
@@ -224,17 +147,21 @@ function update() {
             }
         }
     });
-
-    // --- UIの更新 ---
-    player.health -= 0.05; 
+    player.health -= 0.05;
     healthBarInner.style.width = `${Math.max(0, player.health)}%`;
     scoreDisplay.textContent = score;
-
-    // --- ゲームオーバー判定 ---
     if (player.health <= 0) {
         gameOver = true;
         gameRunning = false;
         gameOverDisplay.style.display = 'block';
+    }
+}
+function handleInput() {
+    if (keys['ArrowLeft'] && player.x > 0) { player.x -= player.speed; }
+    if (keys['ArrowRight'] && player.x < canvas.width - player.width) { player.x += player.speed; }
+    if (keys['Space'] && !player.isJumping) {
+        player.velocityY = -player.jumpPower;
+        player.isJumping = true;
     }
 }
 
@@ -245,11 +172,7 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#2E8B57';
     ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
-    
-    // ★★★修正点★★★：四角形から画像描画に変更
-    // プレイヤーを描画
     ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
-
     const allObjects = [...obstacles, ...items];
     allObjects.forEach(obj => {
         ctx.fillStyle = obj.color;
@@ -263,10 +186,42 @@ function draw() {
 function gameLoop() {
     update();
     draw();
-    if (gameRunning) {
-        requestAnimationFrame(gameLoop);
-    }
+    requestAnimationFrame(gameLoop);
 }
-
-// ゲーム開始
 gameLoop();
+
+// ===================================
+// スマホ用タッチ操作のロジック
+// ===================================
+const btnLeft = document.getElementById('btn-left');
+const btnRight = document.getElementById('btn-right');
+const btnJump = document.getElementById('btn-jump');
+function handleTouchStart(e, keyCode) {
+    if (!gameStarted) {
+        gameStarted = true;
+        startScreen.style.display = 'none';
+        if (!isBgmPlaying) {
+            bgm.play().catch(err => console.log("BGMの再生に失敗:", err));
+            isBgmPlaying = true;
+        }
+    }
+    e.preventDefault();
+    keys[keyCode] = true;
+}
+function handleTouchEnd(e, keyCode) {
+    e.preventDefault();
+    keys[keyCode] = false;
+}
+btnLeft.addEventListener('mousedown', (e) => handleTouchStart(e, 'ArrowLeft'));
+btnLeft.addEventListener('mouseup', (e) => handleTouchEnd(e, 'ArrowLeft'));
+btnLeft.addEventListener('touchstart', (e) => handleTouchStart(e, 'ArrowLeft'));
+btnLeft.addEventListener('touchend', (e) => handleTouchEnd(e, 'ArrowLeft'));
+btnRight.addEventListener('mousedown', (e) => handleTouchStart(e, 'ArrowRight'));
+btnRight.addEventListener('mouseup', (e) => handleTouchEnd(e, 'ArrowRight'));
+btnRight.addEventListener('touchstart', (e) => handleTouchStart(e, 'ArrowRight'));
+btnRight.addEventListener('touchend', (e) => handleTouchEnd(e, 'ArrowRight'));
+btnJump.addEventListener('mousedown', (e) => handleTouchStart(e, 'Space'));
+btnJump.addEventListener('mouseup', (e) => handleTouchEnd(e, 'Space'));
+btnJump.addEventListener('touchstart', (e) => handleTouchStart(e, 'Space'));
+btnJump.addEventListener('touchend', (e) => handleTouchEnd(e, 'Space'));
+window.addEventListener('contextmenu', function (e) { e.preventDefault(); });
