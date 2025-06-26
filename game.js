@@ -50,18 +50,28 @@ let obstacles = [];
 let items = [];
 
 // ===================================
-// 入力処理
+// 入力処理 (スクロール対策強化版)
 // ===================================
 const keys = {};
-document.addEventListener('keydown', (e) => { 
-        // ★★★ここから追加★★★
-    // スペースキーが押された場合、ページのスクロールを防ぐ
+
+// ★★★修正点★★★: documentからwindowに変更し、より確実にイベントを捕捉
+window.addEventListener('keydown', (e) => {
+    // スペースキーが押された場合、ページのスクロールを強力に防ぐ
     if (e.code === 'Space') {
         e.preventDefault();
     }
-    // ★★★ここまで追加★★★
-    
-    keys[e.code] = true; });
+    keys[e.code] = true;
+});
+
+// ★★★修正点★★★: keyupイベントリスナーもwindowに変更し、スクロール防止を追加
+window.addEventListener('keyup', (e) => {
+    // こちらにも念のため追加
+    if (e.code === 'Space') {
+        e.preventDefault();
+    }
+    keys[e.code] = false;
+});
+
 document.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 function handleInput() {
