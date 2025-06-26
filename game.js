@@ -53,7 +53,14 @@ let items = [];
 // 入力処理
 // ===================================
 const keys = {};
-document.addEventListener('keydown', (e) => { keys[e.code] = true; });
+document.addEventListener('keydown', (e) => { 
+        // ★★★ここから追加★★★
+    // スペースキーが押された場合、ページのスクロールを防ぐ
+    if (e.code === 'Space') {
+        e.preventDefault();
+    }
+    // ★★★ここまで追加★★★
+    keys[e.code] = true; });
 document.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 function handleInput() {
