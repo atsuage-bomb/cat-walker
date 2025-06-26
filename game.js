@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // プレイヤーオブジェクト
 const player = {
     x: 50, y: GROUND_Y - 50, width: 30, height: 50,
-    speed: 5, velocityY: 0,
-    jumpPower: 12,      // ★★★修正点★★★: この行を追加
+    speed: 3, velocityY: 0,
+    jumpPower: 10,      // ★★★修正点★★★: この行を追加
     isJumping: false,   // ★★★修正点★★★: trueからfalseに変更
     health: 100, maxHealth: 100,
 };
@@ -108,9 +108,9 @@ const player = {
         if (checkCollision(player, obs)) {
             // ★★★修正点★★★: 敵の種類（色）によってダメージを変える
             if (obs.color === '#228B22') { // もし緑色の敵なら
-                player.health -= 3.0; // ダメージ大
+                player.health -= 2.5; // ダメージ大
             } else { // それ以外（茶色の敵）なら
-                player.health -= 1.0; // ダメージ小
+                player.health -= 0.8; // ダメージ小
             }
         }
     });
@@ -218,7 +218,7 @@ function generateItems() {
         height: 20,
         color: '#FF69B4',
         type: 'health',
-        value: 8
+        value: 10
     });
 
     // ★★★修正点(2)★★★: アイテムの出現間隔をより長くする
