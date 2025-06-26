@@ -42,12 +42,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let nextItemSpawnX = 1300;
     const keys = {};
 
-    // プレイヤーオブジェクト
-    const player = {
-        x: 50, y: GROUND_Y - 50, width: 30, height: 50,
-        speed: 5, velocityY: 0, isJumping: true,
-        health: 100, maxHealth: 100,
-    };
+// プレイヤーオブジェクト
+const player = {
+    x: 50, y: GROUND_Y - 50, width: 30, height: 50,
+    speed: 5, velocityY: 0,
+    jumpPower: 12,      // ★★★修正点★★★: この行を追加
+    isJumping: false,   // ★★★修正点★★★: trueからfalseに変更
+    health: 100, maxHealth: 100,
+};
 
     // オブジェクト配列
     let obstacles = [];
