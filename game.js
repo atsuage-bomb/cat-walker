@@ -204,7 +204,28 @@ const player = {
     // ---- その他の補助関数 ----
     function checkCollision(rect1, rect2) { return rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x && rect1.y < rect2.y + rect2.height && rect1.y + rect1.height > rect2.y; }
     function generateObstacles() { const spawnX = nextObstacleSpawnX; if (Math.random() < 0.5) { obstacles.push({ x: spawnX, y: GROUND_Y - 20, width: 40, height: 20, speed: -(gameSpeed + Math.random() * 2), color: '#228B22' }); } else { const obsHeight = Math.random() * 50 + 20; obstacles.push({ x: spawnX, y: GROUND_Y - obsHeight, width: 30, height: obsHeight, color: '#A52A2A' }); } const spawnInterval = Math.random() * 200 + 150; nextObstacleSpawnX = spawnX + spawnInterval; }
-    function generateItems() { const spawnX = nextItemSpawnX; items.push({ x: spawnX, y: GROUND_Y - 100, width: 20, height: 20, color: '#FF69B4', type: 'health', value: 10 }); const spawnInterval = Math.random() * 600 + 600; nextItemSpawnX = spawnX + spawnInterval; }
+function generateItems() {
+    const spawnX = nextItemSpawnX;
+
+    // ★★★修正点(1)★★★: アイテムの高さをランダムにする
+    // 40〜150ピクセルの間でランダムな高さを決定
+    const randomHeightOffset = Math.random() * 110 + 40;
+
+    items.push({
+        x: spawnX,
+        y: GROUND_Y - randomHeightOffset, // ★ランダムな高さを設定
+        width: 20,
+        height: 20,
+        color: '#FF69B4',
+        type: 'health',
+        value: 10
+    });
+
+    // ★★★修正点(2)★★★: アイテムの出現間隔をより長くする
+    // 800px〜1600pxの間隔に変更し、出現数を減らす
+    const spawnInterval = Math.random() * 800 + 800;
+    nextItemSpawnX = spawnX + spawnInterval;
+}
 
     // ===================================
     // 5. ゲーム全体の開始
