@@ -218,7 +218,7 @@ function generateItems() {
         height: 20,
         color: '#FF69B4',
         type: 'health',
-        value: 10
+        value: 5
     });
 
     // ★★★修正点(2)★★★: アイテムの出現間隔をより長くする
