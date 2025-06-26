@@ -60,6 +60,7 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
     }
     // ★★★ここまで追加★★★
+    
     keys[e.code] = true; });
 document.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
